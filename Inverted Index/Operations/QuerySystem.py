@@ -1,22 +1,34 @@
+from nltk.stem import PorterStemmer
+
 class QuerySystem:
-    def __init__(self, index_inverter):
-        self.inverted_index = index_inverter
+    def __init__(self, inverted_index):
+        self.invertedIndex = inverted_index
+        self.stemmer = PorterStemmer()
 
     def processQuery(self, query):
-        terms = query.split(" AND ")
-        if len(terms) == 1:
-            return self.inverted_index.getDocumentsForTerm(terms[0])
+        if " AND " in query or " and " in query:
+            return self.processAndQuery(query)
+        elif " OR " in query or " or " in query:
+            return self.processOrQuery(query)
+        else:
+            return self.processIndividualTerms(query)
 
-        documents = self.inverted_index.getDocumentsForTerm(terms[0])
-        for term in terms[1:]:
-            documents = self.intersect(documents, self.inverted_index.getDocumentsForTerm(term))
-            if not documents:
-                print("No documents found for query")
+    def processAndQuery(self, query):
+        terms = query.replace(" and ", " AND ").split(" AND ")
+        termSets = [set(self.invertedIndex.getDocumentsForTerm(self.stemmer.stem(term))) for term in terms]
+        result = termSets[0].intersection(*termSets[1:])
+        return result
 
-        return documents
+    def processOrQuery(self, query):
+        terms = query.replace(" or ", " OR ").split(" OR ")
+        termSets = [set(self.invertedIndex.getDocumentsForTerm(self.stemmer.stem(term))) for term in terms]
+        result = set().union(*termSets)
+        return result
 
-    def intersect(self, set1, set2):
-        return set1.intersection(set2)
-
-    def printIndex(self):
-        self.inverted_index.printIndex()
+    def processIndividualTerms(self, query):
+        terms = query.split()
+        stemmedTerms = [self.stemmer.stem(term.lower()) for term in terms]
+        matchingDocs = set()
+        for term in stemmedTerms:
+            matchingDocs.update(self.invertedIndex.getDocumentsForTerm(term))
+        return matchingDocs
