@@ -1,9 +1,9 @@
 from Operations.QuerySystem import QuerySystem
 from Operations.IndexInverter import InvertedIndex
-from time import sleep
+from time import sleep, time
 
 
-def printResult(query, result):
+def printResult(query, result, start_time):
     print("\n------------------------------------------------\n")
     print(f"Query: {query}")
     sleep(0.1)
@@ -14,6 +14,8 @@ def printResult(query, result):
     sleep(0.5)
     print("Documents: ", result)
     print()
+    end_time = time()
+    print("Time taken:", end_time - start_time, "seconds")
     print("\n------------------------------------------------\n")
     sleep(1)
 
@@ -42,9 +44,10 @@ def main():
             userInput = input("Do you want to search for a term? (yes/no): ").lower()
             if userInput == "yes":
                 term = input("Enter the query you want to search for: ")
+                start_time = time()
                 result = querySystem.processQuery(term)
                 if result:
-                    printResult(term, result)
+                    printResult(term, result, start_time)
                 else:
                     print("\nNo documents found for the term.\n")
                     continue
@@ -67,8 +70,9 @@ def main():
                         "biotechnology OR renewable OR energy"
                     ]
                     for query in queries:
+                        start_time = time()
                         result = querySystem.processQuery(query)
-                        printResult(query, result)
+                        printResult(query, result, start_time)
                 else:
                     raise ValueError("\nInvalid choice. Please enter '1' or '2'.\n")
             else:
