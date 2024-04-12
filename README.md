@@ -1,1 +1,1 @@
-# TextualDataAnalysisMethods
+# Method of Textual Data Analysis
