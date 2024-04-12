@@ -1,17 +1,18 @@
 from Operations.QuerySystem import QuerySystem
 from Operations.IndexInverter import InvertedIndex
+from CompressionTypes.Compressor import Compressor
 from time import sleep, time
-
+import random
 
 def printResult(query, result, start_time):
     print("\n------------------------------------------------\n")
     print(f"Query: {query}")
-    sleep(0.1)
+    # sleep(0.1)
     print("\nProcessing the Query...")
-    sleep(0.5)
+    # sleep(0.5)
     print("Process Completed!")
     print("\nResults:")
-    sleep(0.5)
+    # sleep(0.5)
     print("Documents: ", result)
     print()
     end_time = time()
@@ -32,6 +33,10 @@ def main():
         9: "Renewable energy sources such as solar, wind, and hydroelectric power are becoming increasingly important in addressing environmental concerns and reducing dependence on fossil fuels.",
         10: "Biotechnology is the application of biological processes, organisms, or systems to develop products and technologies that improve human health and the environment."
     }
+
+    wordDict = [f"word{i}" for i in range(1000)]
+
+    randomPairs = [(random.choice(wordDict), random.randint(1, 10000)) for _ in range(1000000)]
 
     invertedIndex = InvertedIndex()
     invertedIndex.buildIndex(documents=documents)
@@ -82,6 +87,20 @@ def main():
 
     print("\n------------------------------------------------\n")
     sleep(1)
+    print("\nTesting Compression...\n")
+
+    for word, docID in randomPairs:
+        invertedIndex.invertedIndex[word].add(docID)
+
+    for term, docIDs in invertedIndex.invertedIndex.items():
+        print(f"Term: {term}")
+        print(f"Original DocIDs: {docIDs}")
+        compressedGamma = invertedIndex.compress(docIDs, method="gamma")
+        compressedFibonacci = invertedIndex.compress(docIDs, method="fibonacci")
+        print(f"Gamma Encoded: {compressedGamma}")
+        print(f"Fibonacci Encoded: {compressedFibonacci}")
+        print()
+
     print("\nExiting the Program...")
     sleep(2)
     print("Program Exited!")
