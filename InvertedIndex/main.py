@@ -1,6 +1,6 @@
 from Operations.QuerySystem import QuerySystem
 from Operations.IndexInverter import InvertedIndex
-from CompressionTypes.Compressor import Compressor
+from Compression.Compressor import Compressor
 from time import sleep, time
 import random
 

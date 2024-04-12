@@ -2,7 +2,7 @@ from sortedcontainers import SortedList
 from collections import defaultdict
 from nltk.stem import PorterStemmer
 import re
-from InvertedIndex.CompressionTypes.Compressor import Compressor
+from InvertedIndex.Compression.Compressor import Compressor
 
 class InvertedIndex:
     def __init__(self):
