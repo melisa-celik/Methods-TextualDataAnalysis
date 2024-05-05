@@ -68,21 +68,33 @@ class VectorModel:
     def normalizeRows(self, matrix):
         return normalize(np.array(list(matrix.values())), axis=1).tolist()
 
+    def cosineSimilarity(self, vector1, vector2):
+        dotProduct = self.computeDotProduct(vector1, vector2)
+        normVector1 = math.sqrt(sum(val ** 2 for val in vector1.values()))
+        normVector2 = math.sqrt(sum(val ** 2 for val in vector2.values()))
+
+        if normVector1 == 0 or normVector2 == 0:
+            return 0
+
+        similarity = dotProduct / (normVector1 * normVector2)
+        return similarity
+
     def findMostSimilarDocument(self, docId, use_tfidf=True):
         queryVector = self.tf_idf_weights[docId] if use_tfidf else self.termFrequency[docId]
         similarities = {}
         for otherDocId, otherVector in self.tf_idf_weights.items():
             if otherDocId != docId:
-                similarity = self.computeDotProduct(queryVector, otherVector)
+                similarity = self.cosineSimilarity(queryVector, otherVector)
                 similarities[otherDocId] = similarity
         return max(similarities.items(), key=lambda x: x[1])
 
     def findMostSimilarWord(self, word, use_tfidf=True):
-        queryVector = {word: 1} if use_tfidf else {word: sum(self.termFrequency[docId].get(word, 0) for docId in self.termFrequency)}
+        queryVector = {word: 1} if use_tfidf else {
+            word: sum(self.termFrequency[docId].get(word, 0) for docId in self.termFrequency)}
         similarities = {}
         for term, vector in self.tf_idf_weights.items():
             if term != word:
-                similarity = self.computeDotProduct(queryVector, vector)
+                similarity = self.cosineSimilarity(queryVector, vector)
                 similarities[term] = similarity
         return max(similarities.items(), key=lambda x: x[1])
 
@@ -90,4 +102,3 @@ class VectorModel:
         for docId, weights in self.tf_idf_weights.items():
             length = math.sqrt(sum(w ** 2 for w in weights.values()))
             self.tf_idf_weights[docId] = {term: weight / length for term, weight in weights.items()}
-
