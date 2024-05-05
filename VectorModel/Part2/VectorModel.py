@@ -15,6 +15,7 @@ class VectorModel:
         self.computeTermFrequencies()
         self.computeInverseDocumentFrequencies()
         self.compute_tf_idf_weights()
+        self.normalize_tf_idf_weights()
 
     def loadDocuments(self, filePath):
         with open(filePath, 'r') as file:
@@ -57,19 +58,17 @@ class VectorModel:
         return sorted(scores.items(), key=lambda x: x[1], reverse=True)[:10]
 
     def computeDotProduct(self, vector1, vector2):
-        """Compute the dot product of two vectors."""
-        return sum(vector1[key] * vector2.get(key, 0) for key in vector1)
+        keys = set(vector1.keys()).intersection(vector2.keys())
+        dotProduct = sum(vector1[key] * vector2[key] for key in keys)
+        return dotProduct
 
     def normalizeColumns(self, matrix):
-        """Normalize the columns of a matrix."""
         return normalize(np.array(list(matrix.values())).T, axis=0).T.tolist()
 
     def normalizeRows(self, matrix):
-        """Normalize the rows of a matrix."""
         return normalize(np.array(list(matrix.values())), axis=1).tolist()
 
     def findMostSimilarDocument(self, docId, use_tfidf=True):
-        """Find the most similar document to a given document based on dot product."""
         queryVector = self.tf_idf_weights[docId] if use_tfidf else self.termFrequency[docId]
         similarities = {}
         for otherDocId, otherVector in self.tf_idf_weights.items():
@@ -79,7 +78,6 @@ class VectorModel:
         return max(similarities.items(), key=lambda x: x[1])
 
     def findMostSimilarWord(self, word, use_tfidf=True):
-        """Find the most similar word to a given word based on dot product."""
         queryVector = {word: 1} if use_tfidf else {word: sum(self.termFrequency[docId].get(word, 0) for docId in self.termFrequency)}
         similarities = {}
         for term, vector in self.tf_idf_weights.items():
@@ -87,3 +85,9 @@ class VectorModel:
                 similarity = self.computeDotProduct(queryVector, vector)
                 similarities[term] = similarity
         return max(similarities.items(), key=lambda x: x[1])
+
+    def normalize_tf_idf_weights(self):
+        for docId, weights in self.tf_idf_weights.items():
+            length = math.sqrt(sum(w ** 2 for w in weights.values()))
+            self.tf_idf_weights[docId] = {term: weight / length for term, weight in weights.items()}
+

@@ -1,4 +1,4 @@
-from Part1.VectorModel import *
+from Part2.VectorModel import *
 from time import sleep
 
 def main():
@@ -47,6 +47,16 @@ def main():
             sleep(0.001)
         print()
         sleep(1)
+
+        mostSimilarDocId, similarity = model.findMostSimilarDocument(results[0][0])
+        print(f"Most similar document to {results[0][0]}: Document ID {mostSimilarDocId}, Similarity: {similarity}\n")
+
+        mostSimilarWord, similarity = model.findMostSimilarWord(queryTerms[0])
+        print(f"Most similar word to '{queryTerms[0]}': '{mostSimilarWord}', Similarity: {similarity}\n")
+        print("-----------------------------------------------------------------------------------------------------------\n")
+
+        sleep(1)
+
 
 if __name__ == "__main__":
     main()
