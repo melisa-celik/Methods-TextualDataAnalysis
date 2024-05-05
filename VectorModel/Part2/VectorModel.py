@@ -1,6 +1,6 @@
+import math
 from collections import defaultdict
 import json
-import math
 import numpy as np
 from sklearn.preprocessing import normalize
 
@@ -62,40 +62,40 @@ class VectorModel:
         dotProduct = sum(vector1[key] * vector2[key] for key in keys)
         return dotProduct
 
-    def normalizeColumns(self, matrix):
-        return normalize(np.array(list(matrix.values())).T, axis=0).T.tolist()
-
-    def normalizeRows(self, matrix):
-        return normalize(np.array(list(matrix.values())), axis=1).tolist()
-
     def cosineSimilarity(self, vector1, vector2):
-        dotProduct = self.computeDotProduct(vector1, vector2)
+        keys = set(vector1.keys()).intersection(vector2.keys())
+        if not keys:
+            return 0
+
+        dotProduct = sum(vector1[key] * vector2[key] for key in keys)
         normVector1 = math.sqrt(sum(val ** 2 for val in vector1.values()))
         normVector2 = math.sqrt(sum(val ** 2 for val in vector2.values()))
-
-        if normVector1 == 0 or normVector2 == 0:
-            return 0
 
         similarity = dotProduct / (normVector1 * normVector2)
         return similarity
 
     def findMostSimilarDocument(self, docId, use_tfidf=True):
         queryVector = self.tf_idf_weights[docId] if use_tfidf else self.termFrequency[docId]
+        queryNorm = math.sqrt(sum(val ** 2 for val in queryVector.values()))
+
         similarities = {}
         for otherDocId, otherVector in self.tf_idf_weights.items():
             if otherDocId != docId:
                 similarity = self.cosineSimilarity(queryVector, otherVector)
                 similarities[otherDocId] = similarity
+
         return max(similarities.items(), key=lambda x: x[1])
 
     def findMostSimilarWord(self, word, use_tfidf=True):
-        queryVector = {word: 1} if use_tfidf else {
-            word: sum(self.termFrequency[docId].get(word, 0) for docId in self.termFrequency)}
+        queryVector = {word: 1} if use_tfidf else {word: sum(self.termFrequency[docId].get(word, 0) for docId in self.termFrequency)}
+        queryNorm = math.sqrt(sum(val ** 2 for val in queryVector.values()))
+
         similarities = {}
         for term, vector in self.tf_idf_weights.items():
             if term != word:
                 similarity = self.cosineSimilarity(queryVector, vector)
                 similarities[term] = similarity
+
         return max(similarities.items(), key=lambda x: x[1])
 
     def normalize_tf_idf_weights(self):
