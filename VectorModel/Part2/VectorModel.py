@@ -57,10 +57,10 @@ class VectorModel:
 
         return sorted(scores.items(), key=lambda x: x[1], reverse=True)[:10]
 
-    def computeDotProduct(self, vector1, vector2):
-        keys = set(vector1.keys()).intersection(vector2.keys())
-        dotProduct = sum(vector1[key] * vector2[key] for key in keys)
-        return dotProduct
+    # def computeDotProduct(self, vector1, vector2):
+    #     keys = set(vector1.keys()).intersection(vector2.keys())
+    #     dotProduct = sum(vector1[key] * vector2[key] for key in keys)
+    #     return dotProduct
 
     def cosineSimilarity(self, vector1, vector2):
         keys = set(vector1.keys()).intersection(vector2.keys())

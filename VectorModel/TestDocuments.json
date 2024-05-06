@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "content": "Mary is the sister of Susan"
+  },
+  {
+    "id": 2,
+    "content": "Susan is the sister of Mary"
+  },
+  {
+    "id": 3,
+    "content": "Mary is the daughter of John"
+  },
+  {
+    "id": 4,
+    "content": "John is the father of Mary"
+  },
+  {
+    "id": 5,
+    "content": "Susan is the daughter of John"
+  },
+  {
+    "id": 6,
+    "content": "John is the father of Susan"
+  },
+  {
+    "id": 7,
+    "content": "John is the husband of Jane"
+  },
+  {
+    "id": 8,
+    "content": "Jane is the wife of John"
+  },
+  {
+    "id": 9,
+    "content": "Jane is the mother of Mary"
+  },
+  {
+    "id": 10,
+    "content": "Mary is the daughter of Jane"
+  },
+  {
+    "id": 11,
+    "content": "Jane is the mother of Susan"
+  },
+  {
+    "id": 12,
+    "content": "Susan is the daughter of Jane"
+  },
+  {
+    "id": 13,
+    "content": "John loves Jane"
+  },
+  {
+    "id": 14,
+    "content": "Jane loves John"
+  },
+  {
+      "id": 15,
+      "content": "Mary loves Susan"
+  },
+  {
+      "id": 16,
+      "content": "Susan loves Mary"
+  },
+  {
+    "id": 17,
+    "content": "Mary loves her family"
+  },
+  {
+    "id": 18,
+    "content": "Susan loves her family"
+  },
+  {
+    "id": 19,
+    "content": "John loves his family"
+  },
+  {
+    "id": 20,
+    "content": "Jane loves her family"
+  }
+]

@@ -9,8 +9,8 @@ def loadTextFromFile(filePath):
 def main():
     print("\n---Latent Semantic Analysis---")
 
-    filePath = "C:\\Users\\Lenovo\\PycharmProjects\\Methods-TextualDataAnalysis\\StringSearching\\english.50MB"
-    fileName = "english.50MB"
+    filePath = "TestText.txt"
+    fileName = "Test Text"
 
     print(f"\nLoading the Book of {fileName}...")
     text = loadTextFromFile(filePath)

@@ -89,6 +89,16 @@ def main():
     sleep(1)
     print("\nTesting Compression...\n")
 
+    print("Creating Inverted Index...")
+    sleep(1)
+    print("Inverted Index Created Successfully!\n")
+    sleep(1)
+    print("Randomly adding 1000 words and 1000 document IDs to the Inverted Index...\n")
+    sleep(1)
+    print("Compressing the Inverted Index...\n")
+
+    # print(f"Random Pairs: {randomPairs}...")
+
     for word, docID in randomPairs:
         invertedIndex.invertedIndex[word].add(docID)
 
@@ -97,6 +107,7 @@ def main():
         print(f"Original DocIDs: {docIDs}")
         compressedGamma = invertedIndex.compress(docIDs, method="gamma")
         compressedFibonacci = invertedIndex.compress(docIDs, method="fibonacci")
+
         print(f"Gamma Encoded: {compressedGamma}")
         print(f"Fibonacci Encoded: {compressedFibonacci}")
         print()

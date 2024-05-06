@@ -38,6 +38,13 @@ def main():
         "computer"
     ]
 
+    testQueries = [
+        "Mary loves",
+        "Mary loves Susan",
+        "Susan loves Mary",
+        "Susan loves",
+    ]
+
     for query in queries:
         queryTerms = query.split()
         results = model.scoreDocuments(queryTerms)
