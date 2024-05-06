@@ -41,15 +41,15 @@ class LSA:
 
         return processedSentences
 
-    def construct_tf_matrix(self, sentences):
-        vectorizer = CountVectorizer()
+    def construct_tf_matrix(self, sentences, max_features=1000):
+        vectorizer = CountVectorizer(max_features=max_features)
         tf_matrix = vectorizer.fit_transform(sentences)
-        terms = vectorizer.get_feature_names()
+        terms = vectorizer.get_feature_names_out()
 
         return tf_matrix, terms
 
-    def applySVD(self, tf_matrix):
-        svd = TruncatedSVD(n_components=min(tf_matrix.shape) - 1)
+    def applySVD(self, tf_matrix, n_components=100):
+        svd = TruncatedSVD(n_components=n_components)
         U = svd.fit_transform(tf_matrix)
         S = svd.explained_variance_ratio_
         V_T = svd.components_

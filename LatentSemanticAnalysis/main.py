@@ -1,4 +1,4 @@
-from LSA.LSA import *
+from LSA_Model.LSA import LSA
 from time import sleep
 
 def loadTextFromFile(filePath):
@@ -19,12 +19,15 @@ def main():
 
     print("-----------------------------------------------------------------------------------------------------------")
     lsa = LSA(text=text)
+    tf_matrix, terms = lsa.construct_tf_matrix(lsa.sentences, max_features=1000)
+    U, S, V_T = lsa.applySVD(tf_matrix, n_components=100)
 
     print(f"\nInitializing Vector Model {lsa}")
     sleep(1)
     print("The Model for Latent Semantic Analysis created successfully!\n")
 
     print("-----------------------------------------------------------------------------------------------------------")
+
     print("Extracting most significant sentences and terms...")
     sleep(1)
     highestSentences, lowestSentences = lsa.getMostSignificantSentences(2)
