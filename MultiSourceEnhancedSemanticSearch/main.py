@@ -48,6 +48,12 @@ webInterface = WebInterface(semanticSearch, documentClusterer)
 app = Flask(__name__, template_folder=r"C:\Users\Lenovo\PycharmProjects\Methods-TextualDataAnalysis\MultiSourceEnhancedSemanticSearch\System\WebServer\HTMLFiles")
 app.secret_key = '23042001'
 
+# @app.route('/search', methods=['POST'])
+# def search():
+#     query = request.form['query']
+#     results = searchWithInvertedIndex(query)
+#     return render_template('results.html', results=results)
+
 def searchWithInvertedIndex(query):
     expandedQuery = queryExpander.expandQuery(query)
     documentEmbeddings = EmbeddingGenerator().generateEmbeddings(documents)
@@ -61,27 +67,19 @@ def searchWithInvertedIndex(query):
     top_k_indices, similarities = semanticSearch.search(query, relevantDocumentEmbeddings)
     return [(relevantDocuments[i], similarities[i]) for i in top_k_indices]
 
-
-# @app.route('/search', methods=['POST'])
-# def search():
-#     query = request.form['query']
-#     results = searchWithInvertedIndex(query)
-#     return render_template('results.html', results=results)
-
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form['query']
-    top_k_indices = semanticSearch.search(query, docEmbeddings)
-    # results = [{"document": documents[i], "similarity": similarities[j]} for j, i in enumerate(top_k_indices)]
-    results = [{"document": documents[i]} for i in top_k_indices]
+    top_k_indices, similarities = semanticSearch.search(query, docEmbeddings)
+    results = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(top_k_indices, similarities)]
     return render_template('results.html', results=results)
 
-@app.route('/visualize', methods=['POST'])
+@app.route('/visualize', methods=['GET'])
 def visualize():
-    visualizationData = WebInterface.prepareVisualizationData(docEmbeddings, clusters)
+    visualizationData = webInterface.prepareVisualizationData(docEmbeddings, clusters)
     fig = px.scatter(visualizationData, x=0, y=1, color='Cluster', title='Document Clusters')
     graph = fig.to_html(full_html=False)
-    return render_template('visualization.html', graph=graph)
+    return render_template('visualize.html', graph=graph)
 
 @app.route('/')
 def index():
@@ -120,6 +118,12 @@ def logout():
     session.pop('userID', None)
     return redirect(url_for('login'))
 
+@app.route('/recommend', methods=['GET'])
+def recommend():
+    userHistory = [0, 1, 2]  # Example history, replace with actual user history
+    recommendedIndices, similarities = recommenderSystem.recommendDocuments(userHistory, docEmbeddings)
+    recommendations = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(recommendedIndices, similarities)]
+    return render_template('recommendations.html', recommendations=recommendations)
 
 def main():
     preprocessedDocuments = dataPreprocessor.preprocessData(documents)

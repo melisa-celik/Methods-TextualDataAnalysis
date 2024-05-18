@@ -45,9 +45,8 @@ class WebInterface:
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form['query']
-    top_k_indices = semanticSearch.search(query, documentEmbeddings)
-    # results = [{"document": documents[i], "similarity": similarities[j]} for j, i in enumerate(top_k_indices)]
-    results = [{"document": documents[i]} for i in top_k_indices]
+    top_k_indices, similarities = semanticSearch.search(query, documentEmbeddings, top_k=5)
+    results = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(top_k_indices, similarities)]
     return render_template('results.html', results=results)
 
 @app.route('/visualize', methods=['POST'])
