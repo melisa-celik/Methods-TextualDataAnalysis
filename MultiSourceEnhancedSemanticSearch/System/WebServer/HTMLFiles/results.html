@@ -6,6 +6,7 @@
 </head>
 <body>
     <h1>Search Results</h1>
+    <p>The query entered is about the topic "{{ queryTopic }}".</p>
     <ul>
         {% for result in results %}
         <li>{{ result.document }} (Similarity: {{ result.similarity }})</li>

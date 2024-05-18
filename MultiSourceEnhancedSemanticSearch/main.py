@@ -1,6 +1,7 @@
 from flask import Flask , request, render_template, redirect, url_for, session
 import plotly.express as px
 import logging
+import pandas as pd
 from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.DocumentClustering.DocumentClustering import DocumentClusterer
 from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.TopicModeling.TopicModeling import TopicModeler
 from MultiSourceEnhancedSemanticSearch.DataPreprocessing.DataPreprocessing import DataPreprocessor
@@ -17,19 +18,12 @@ from MultiSourceEnhancedSemanticSearch.System.WebServer.WebServer import WebInte
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-documents = [
-    "Natural language processing (NLP) is a field of artificial intelligence.",
-    "It focuses on the interaction between computers and humans through natural language.",
-    "The ultimate objective of NLP is to read, decipher, understand, and make sense of human languages.",
-    "Most NLP techniques rely on machine learning to derive meaning from human languages.",
-    "NLP is used to apply algorithms to identify and extract information from textual data and speech.",
-    "Natural language processing helps computers communicate with humans in their own language and scales other language-related tasks.",
-    "For example, NLP makes it possible for computers to read text, hear speech, interpret it, measure sentiment and determine which parts are important.",
-    "NLP involves several challenges such as natural language understanding, natural language generation, natural language translation, and natural language acquisition.",
-    "Natural language processing is used to apply algorithms to identify and extract information from textual data and speech.",
-    "Natural language processing helps computers communicate with humans in their own language.",
-    "Natural language processing involves several challenges such as natural language understanding, natural language generation, natural language translation, and natural language acquisition."
-]
+def loadDocuments(file_path):
+    with open(file_path, 'r') as file:
+        documents = file.readlines()
+    return [doc.strip() for doc in documents]
+
+documents = loadDocuments(r"C:\Users\Lenovo\PycharmProjects\Methods-TextualDataAnalysis\MultiSourceEnhancedSemanticSearch\Data\documents.txt")
 
 logger.debug("Initializing Components...")
 dataPreprocessor = DataPreprocessor()
@@ -37,7 +31,6 @@ invertedIndex = InvertedIndex()
 embeddingGenerator = EmbeddingGenerator()
 semanticSearch = SemanticSearch(embeddingGenerator, dataPreprocessor)
 queryExpander = QueryExpander(dataPreprocessor)
-documentClusterer = DocumentClusterer(numClusters=3)
 topicModeler = TopicModeler()
 recommenderSystem = RecommenderSystem(embeddingGenerator)
 
@@ -52,9 +45,15 @@ except ValueError as e:
     print(e)
 
 recommendEvaluator = RecommendEvaluator(recommenderSystem, user.userID)
-webInterface = WebInterface(semanticSearch, documentClusterer)
 app = Flask(__name__, template_folder=r"C:\Users\Lenovo\PycharmProjects\Methods-TextualDataAnalysis\MultiSourceEnhancedSemanticSearch\System\WebServer\HTMLFiles")
 app.secret_key = '23042001'
+
+preprocessedDocuments = dataPreprocessor.preprocessData(documents)
+docEmbeddings = embeddingGenerator.generateEmbeddings(preprocessedDocuments)
+topics, numTopics = topicModeler.model(preprocessedDocuments)
+documentClusterer = DocumentClusterer(numClusters=numTopics)
+clusters = documentClusterer.clusterDocuments(docEmbeddings)
+webInterface = WebInterface(semanticSearch, documentClusterer)
 
 # @app.route('/search', methods=['POST'])
 # def search():
@@ -81,12 +80,17 @@ def search():
     logger.debug(f"Search query: {query}")
     top_k_indices, similarities = semanticSearch.search(query, docEmbeddings)
     results = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(top_k_indices, similarities)]
-    return render_template('results.html', results=results)
+
+    queryTopicIndex = topicModeler.topicModel.transform([query])[0]
+    queryTopic = topicModeler.topicModel.components_[queryTopicIndex]
+
+    return render_template('results.html', results=results, queryTopic=queryTopic)
 
 @app.route('/visualize', methods=['GET'])
 def visualize():
     logger.debug("Generating Visualization...")
-    visualizationData = webInterface.prepareVisualizationData(docEmbeddings, clusters)
+    visualizationData = pd.DataFrame(docEmbeddings)
+    visualizationData['Cluster'] = clusters
     fig = px.scatter(visualizationData, x=0, y=1, color='Cluster', title='Document Clusters')
     graph = fig.to_html(full_html=False)
     return render_template('visualize.html', graph=graph)
@@ -140,8 +144,15 @@ def recommend():
     logger.debug(f"Generating recommendations for user history: {userHistory}")
     recommendedIndices, similarities = recommenderSystem.recommendDocuments(userHistory, docEmbeddings)
     recommendations = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(recommendedIndices, similarities)]
+
+    groundTruth = [1 if i in userHistory else 0 for i in range(len(documents))]
+    predictions = [1 if i in recommendedIndices else 0 for i in range(len(documents))]
+
+    precision, recall, f1 = recommendEvaluator.evaluate(groundTruth, predictions)
+
     logger.debug(f"Recommendations: {recommendations}")
-    return render_template('recommendations.html', recommendations=recommendations)
+    logger.debug(f"Evaluation - Precision: {precision}, Recall: {recall}, F1: {f1}")
+    return render_template('recommendations.html', recommendations=recommendations, precision=precision, recall=recall, f1=f1)
 
 def main():
     logger.debug("Initializing General Operations...")
@@ -159,6 +170,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-

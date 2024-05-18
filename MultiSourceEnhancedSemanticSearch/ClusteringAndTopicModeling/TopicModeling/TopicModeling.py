@@ -5,5 +5,6 @@ class TopicModeler:
         self.topicModel = BERTopic()
 
     def model(self, documents):
-        topics, _ = self.topicModel.fit_transform([" ".join(document) for document in documents])
-        return topics
+        topics, probs = self.topicModel.fit_transform([" ".join(document) for document in documents])
+        numTopics = len(set(topics))
+        return topics, numTopics

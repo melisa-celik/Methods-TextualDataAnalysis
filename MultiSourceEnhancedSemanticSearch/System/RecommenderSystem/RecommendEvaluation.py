@@ -8,7 +8,7 @@ class RecommendEvaluator:
 
     def evaluate(self, groundTruth, predictions):
         # groundTruth = self.data[self.userID][groundTruth]
-        precision = precision_score(groundTruth, predictions, average='micro')
-        recall = recall_score(groundTruth, predictions, average='micro')
-        f1 = f1_score(groundTruth, predictions, average='micro')
+        precision = precision_score(groundTruth, predictions)
+        recall = recall_score(groundTruth, predictions)
+        f1 = f1_score(groundTruth, predictions)
         return precision, recall, f1

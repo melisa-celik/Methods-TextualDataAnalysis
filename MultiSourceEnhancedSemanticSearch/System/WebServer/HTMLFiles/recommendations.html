@@ -11,6 +11,12 @@
         <li>{{ recommendation.document }} (Similarity: {{ recommendation.similarity }})</li>
         {% endfor %}
     </ul>
+    <p>Evaluation Metrics:</p>
+    <ul>
+        <li>Precision: {{ precision }}</li>
+        <li>Recall: {{ recall }}</li>
+        <li>F1 Score: {{ f1 }}</li>
+    </ul>
     <a href="/">Back to Search</a>
 </body>
 </html>

@@ -6,6 +6,7 @@ from MultiSourceEnhancedSemanticSearch.SemanticSearch.SemanticSearch import Sema
 from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.DocumentClustering.DocumentClustering import DocumentClusterer
 from MultiSourceEnhancedSemanticSearch.GeneratingEmbeddings.GeneratingEmbeddings import EmbeddingGenerator
 from MultiSourceEnhancedSemanticSearch.DataPreprocessing.DataPreprocessing import DataPreprocessor
+from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.TopicModeling.TopicModeling import TopicModeler
 
 app = Flask(__name__, template_folder=r"C:\Users\Lenovo\PycharmProjects\Methods-TextualDataAnalysis\MultiSourceEnhancedSemanticSearch\System\WebServer\HTMLFiles")
 app.secret_key = '23042001'
@@ -28,7 +29,10 @@ authentication = UserAuthenticator()
 dataPreprocessor = DataPreprocessor()
 embeddingGenerator = EmbeddingGenerator()
 semanticSearch = SemanticSearch(embeddingGenerator, dataPreprocessor)
-documentClusterer = DocumentClusterer()
+preprocessedDocuments = dataPreprocessor.preprocessData(documents)
+topicModeler = TopicModeler()
+topics, numTopics = topicModeler.model(preprocessedDocuments)
+documentClusterer = DocumentClusterer(numClusters=numTopics)
 documentEmbeddings = semanticSearch.embeddingsGenerator.generateEmbeddings(documents)
 clusters = documentClusterer.clusterDocuments(documentEmbeddings)
 
