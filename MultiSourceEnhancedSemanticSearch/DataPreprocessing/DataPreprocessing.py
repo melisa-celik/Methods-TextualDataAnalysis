@@ -18,7 +18,7 @@ class DataPreprocessor:
         text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
         text = text.lower()
         tokens = word_tokenize(text)
-        tokens = [self.lemmatizer.lemmatize(self.ps.stem(word)) for word in tokens if word not in self.stop_words]
+        tokens = [self.lemmatizer.lemmatize(self.ps.stem(word)) for word in tokens if word not in self.stopWords]
         return tokens
 
     def preprocessData(self, data):
