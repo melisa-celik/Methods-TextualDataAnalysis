@@ -49,8 +49,9 @@ app = Flask(__name__, template_folder=r"C:\Users\Lenovo\PycharmProjects\Methods-
 app.secret_key = '23042001'
 
 preprocessedDocuments = dataPreprocessor.preprocessData(documents)
+preprocessedDocumentsAsStrings = [" ".join(doc) for doc in preprocessedDocuments]  # Convert tokenized docs to strings
 docEmbeddings = embeddingGenerator.generateEmbeddings(preprocessedDocuments)
-topics, numTopics = topicModeler.model(preprocessedDocuments)
+topics, numTopics = topicModeler.model(preprocessedDocumentsAsStrings)
 documentClusterer = DocumentClusterer(numClusters=numTopics)
 clusters = documentClusterer.clusterDocuments(docEmbeddings)
 webInterface = WebInterface(semanticSearch, documentClusterer)
@@ -81,8 +82,9 @@ def search():
     top_k_indices, similarities = semanticSearch.search(query, docEmbeddings)
     results = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(top_k_indices, similarities)]
 
-    queryTopicIndex = topicModeler.topicModel.transform([query])[0]
-    queryTopic = topicModeler.topicModel.components_[queryTopicIndex]
+    queryTokens = dataPreprocessor.preprocessText(query)
+    queryTopicIndex = topicModeler.topicModel.transform([" ".join(queryTokens)])[0]
+    queryTopic = topicModeler.topicModel.get_topic(queryTopicIndex)
 
     return render_template('results.html', results=results, queryTopic=queryTopic)
 
@@ -154,14 +156,16 @@ def recommend():
     logger.debug(f"Evaluation - Precision: {precision}, Recall: {recall}, F1: {f1}")
     return render_template('recommendations.html', recommendations=recommendations, precision=precision, recall=recall, f1=f1)
 
+
 def main():
     logger.debug("Initializing General Operations...")
     preprocessedDocuments = dataPreprocessor.preprocessData(documents)
+    preprocessedDocumentsAsStrings = [" ".join(doc) for doc in preprocessedDocuments]
     global docEmbeddings, clusters
     index = invertedIndex.buildInvertedIndex(preprocessedDocuments)
     docEmbeddings = embeddingGenerator.generateEmbeddings(preprocessedDocuments)
     clusters = documentClusterer.clusterDocuments(docEmbeddings)
-    topics = topicModeler.model(preprocessedDocuments)
+    topics, numTopics = topicModeler.model(preprocessedDocumentsAsStrings)
 
     webInterface.prepareVisualizationData(docEmbeddings, clusters)
 

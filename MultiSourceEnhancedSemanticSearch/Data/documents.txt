@@ -9,7 +9,7 @@ Blockchain technology provides a decentralized ledger system that ensures data i
 Cybersecurity involves protecting computer systems and networks from theft, damage, or unauthorized access.
 Regular exercise is essential for maintaining physical health and well-being.
 A balanced diet that includes a variety of nutrients supports overall health and prevents chronic diseases.
-Advancements in medical technology have significantly improved diagnostic and treatment options for various diseaes.
+Advancements in medical technology have significantly improved diagnostic and treatment options for various diseases.
 Vaccines play a vital role in preventing infectious diseases and promoting public health.
 Telemedicine allows patients to consult with healthcare providers remotely using digital communication tools.
 Personal finance involves managing one's money, including budgeting, saving, investing, and planning for retirement.
@@ -95,7 +95,7 @@ Cibersecurity involves protecting computer systems and networks from theft, dama
 Regular exercise is essential for maintaining physical health and well-being.
 A balanced diet that includes a variety of nutrients supports overall health and prevents chronic diseases.
 Mental health is a crucial aspect of well-being, encompassing emotional, psychological, and social well-being.
-Illuminated manuscripts are hand-written books that are decorated with intricate designs, illustrations, and gold or silver leaf.
+Illuminated manuscripts are handwritten books that are decorated with intricate designs, illustrations, and gold or silver leaf.
 The Gutenberg Bible was the first major book printed using movable type in Europe, marking the beginning of the Gutenberg Revolution.
 The Library of Alexandria was one of the largest and most significant libraries of the ancient world, known for its collection of scrolls and scholarly works.
 The Rosetta Stone is an ancient Egyptian artifact that played a crucial role in deciphering hieroglyphics and understanding ancient Egyptian language and culture.
