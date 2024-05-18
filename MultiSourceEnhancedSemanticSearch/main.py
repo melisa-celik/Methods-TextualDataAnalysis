@@ -1,5 +1,6 @@
 from flask import Flask , request, render_template, redirect, url_for, session
 import plotly.express as px
+import logging
 from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.DocumentClustering.DocumentClustering import DocumentClusterer
 from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.TopicModeling.TopicModeling import TopicModeler
 from MultiSourceEnhancedSemanticSearch.DataPreprocessing.DataPreprocessing import DataPreprocessor
@@ -12,6 +13,9 @@ from MultiSourceEnhancedSemanticSearch.System.RecommenderSystem.RecommendEvaluat
 from MultiSourceEnhancedSemanticSearch.System.User.User import User
 from MultiSourceEnhancedSemanticSearch.System.User.Security import UserAuthenticator
 from MultiSourceEnhancedSemanticSearch.System.WebServer.WebServer import WebInterface
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 documents = [
     "Natural language processing (NLP) is a field of artificial intelligence.",
@@ -27,6 +31,7 @@ documents = [
     "Natural language processing involves several challenges such as natural language understanding, natural language generation, natural language translation, and natural language acquisition."
 ]
 
+logger.debug("Initializing Components...")
 dataPreprocessor = DataPreprocessor()
 invertedIndex = InvertedIndex()
 embeddingGenerator = EmbeddingGenerator()
@@ -35,7 +40,10 @@ queryExpander = QueryExpander(dataPreprocessor)
 documentClusterer = DocumentClusterer(numClusters=3)
 topicModeler = TopicModeler()
 recommenderSystem = RecommenderSystem(embeddingGenerator)
+
+logging.debug("Creating User...")
 user = User("cel0052", "Melisa Çelik", "melisa.celik.st@vsb.cz", "celik12345")
+logging.debug("Authenticating User...")
 userAuthenticator = UserAuthenticator()
 
 try:
@@ -70,12 +78,14 @@ def searchWithInvertedIndex(query):
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form['query']
+    logger.debug(f"Search query: {query}")
     top_k_indices, similarities = semanticSearch.search(query, docEmbeddings)
     results = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(top_k_indices, similarities)]
     return render_template('results.html', results=results)
 
 @app.route('/visualize', methods=['GET'])
 def visualize():
+    logger.debug("Generating Visualization...")
     visualizationData = webInterface.prepareVisualizationData(docEmbeddings, clusters)
     fig = px.scatter(visualizationData, x=0, y=1, color='Cluster', title='Document Clusters')
     graph = fig.to_html(full_html=False)
@@ -84,6 +94,7 @@ def visualize():
 @app.route('/')
 def index():
     if 'userID' in session:
+        logger.debug(f"User {session['userID']} is logged in.")
         return render_template('index.html', userID=session['userID'])
     return redirect(url_for('login'))
 
@@ -94,6 +105,7 @@ def register():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
+        logger.debug(f"Registering user: {userID}, {name}, {email}")
         try:
             userAuthenticator.register(userID, name, email, password)
             return redirect(url_for('login'))
@@ -106,26 +118,33 @@ def login():
     if request.method == 'POST':
         userID = request.form['userID']
         password = request.form['password']
+        logger.debug(f"Login attempt for user: {userID}")
         result = userAuthenticator.login(userID, password)
         if result == "Login successful":
             session['userID'] = userID
+            logger.debug(f"Login successful for user: {userID}")
             return redirect(url_for('index'))
+        logger.debug(f"Login failed for user: {userID}")
         return result
     return render_template('login.html')
 
 @app.route('/logout')
 def logout():
+    logger.debug(f"User {session.get('userID')} logging out.")
     session.pop('userID', None)
     return redirect(url_for('login'))
 
 @app.route('/recommend', methods=['GET'])
 def recommend():
-    userHistory = [0, 1, 2]  # Example history, replace with actual user history
+    userHistory = [0, 1, 2]
+    logger.debug(f"Generating recommendations for user history: {userHistory}")
     recommendedIndices, similarities = recommenderSystem.recommendDocuments(userHistory, docEmbeddings)
     recommendations = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(recommendedIndices, similarities)]
+    logger.debug(f"Recommendations: {recommendations}")
     return render_template('recommendations.html', recommendations=recommendations)
 
 def main():
+    logger.debug("Initializing General Operations...")
     preprocessedDocuments = dataPreprocessor.preprocessData(documents)
     global docEmbeddings, clusters
     index = invertedIndex.buildInvertedIndex(preprocessedDocuments)
@@ -134,6 +153,8 @@ def main():
     topics = topicModeler.model(preprocessedDocuments)
 
     webInterface.prepareVisualizationData(docEmbeddings, clusters)
+
+    logger.debug("Initialization complete. Starting Flask app.")
     app.run(debug=True, port=5000)
 
 if __name__ == "__main__":
