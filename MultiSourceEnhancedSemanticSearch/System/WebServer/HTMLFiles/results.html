@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Searh Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <ul>
+        {% for result in results %}
+        <li>{{ result.document }} (Similarity: {{ result.similarity }})</li>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to Search</a>
+</body>
+</html>
