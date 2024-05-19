@@ -2,6 +2,9 @@ from flask import Flask , request, render_template, redirect, url_for, session
 import plotly.express as px
 import logging
 import pandas as pd
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
 from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.DocumentClustering.DocumentClustering import DocumentClusterer
 from MultiSourceEnhancedSemanticSearch.ClusteringAndTopicModeling.TopicModeling.TopicModeling import TopicModeler
 from MultiSourceEnhancedSemanticSearch.DataPreprocessing.DataPreprocessing import DataPreprocessor
@@ -23,14 +26,20 @@ def loadDocuments(file_path):
         documents = file.readlines()
     return [doc.strip() for doc in documents]
 
-documents = loadDocuments(r"C:\Users\Lenovo\PycharmProjects\Methods-TextualDataAnalysis\MultiSourceEnhancedSemanticSearch\Data\documents.txt")
+logger.debug("Loading Documents...")
 
-logger.debug("Initializing Components...")
+documents = loadDocuments(r"C:\Users\Lenovo\PycharmProjects\Methods-TextualDataAnalysis\MultiSourceEnhancedSemanticSearch\Data\documents.txt")
+logger.debug(f"Loaded {len(documents)} documents.")
+for i, doc in enumerate(documents):
+    logger.debug(f"Document {i}: {doc}")
+
+logging.debug("Initializing Components...")
 dataPreprocessor = DataPreprocessor()
 invertedIndex = InvertedIndex()
-embeddingGenerator = EmbeddingGenerator()
+embeddingGenerator = EmbeddingGenerator('sentence-transformers/all-MiniLM-L6-v2')
 semanticSearch = SemanticSearch(embeddingGenerator, dataPreprocessor)
 queryExpander = QueryExpander(dataPreprocessor)
+embeddingModel = SentenceTransformer('all-MiniLM-L6-v2')
 topicModeler = TopicModeler()
 recommenderSystem = RecommenderSystem(embeddingGenerator)
 
@@ -48,13 +57,37 @@ recommendEvaluator = RecommendEvaluator(recommenderSystem, user.userID)
 app = Flask(__name__, template_folder=r"C:\Users\Lenovo\PycharmProjects\Methods-TextualDataAnalysis\MultiSourceEnhancedSemanticSearch\System\WebServer\HTMLFiles")
 app.secret_key = '23042001'
 
-preprocessedDocuments = dataPreprocessor.preprocessData(documents)
-preprocessedDocumentsAsStrings = [" ".join(doc) for doc in preprocessedDocuments]  # Convert tokenized docs to strings
+preprocessedDocuments = dataPreprocessor.preprocessDocuments(documents)
+logger.debug(f"Preprocessed documents: {preprocessedDocuments}")
+
+if not preprocessedDocuments:
+    logger.error("All documents are empty after preprocessing! Exiting...")
+    exit(1)
+
+logger.debug("Building Inverted Index...")
+index = invertedIndex.buildInvertedIndex(preprocessedDocuments)
+logger.debug("Inverted Index built.")
+
+logger.debug("Generating Document Embeddings...")
 docEmbeddings = embeddingGenerator.generateEmbeddings(preprocessedDocuments)
-topics, numTopics = topicModeler.model(preprocessedDocumentsAsStrings)
-documentClusterer = DocumentClusterer(numClusters=numTopics)
+if not isinstance(docEmbeddings, np.ndarray):
+    docEmbeddings = np.array(docEmbeddings)
+logger.debug("Document Embeddings generated.")
+logger.debug(f"Document Embeddings: {docEmbeddings}")
+logger.debug(f"Shape of Document Embeddings: {docEmbeddings.shape}")
+
+logger.debug("Modeling Topics...")
+topics, numTopics = topicModeler.model(preprocessedDocuments, docEmbeddings)
+logger.debug(f"Topics: {topics}")
+logger.debug(f"Number of Topics: {numTopics}")
+
+logger.debug("Clustering Documents...")
+documentClusterer = DocumentClusterer(numTopics)
 clusters = documentClusterer.clusterDocuments(docEmbeddings)
-webInterface = WebInterface(semanticSearch, documentClusterer)
+logger.debug("Documents clustered.")
+
+webInterface = WebInterface(semanticSearch, DocumentClusterer)
+logger.debug("Web Interface initialized.")
 
 # @app.route('/search', methods=['POST'])
 # def search():
@@ -83,8 +116,9 @@ def search():
     results = [{"document": documents[i], "similarity": f"{similarity:.4f}"} for i, similarity in zip(top_k_indices, similarities)]
 
     queryTokens = dataPreprocessor.preprocessText(query)
-    queryTopicIndex = topicModeler.topicModel.transform([" ".join(queryTokens)])[0]
-    queryTopic = topicModeler.topicModel.get_topic(queryTopicIndex)
+    queryString = " ".join(queryTokens)
+    queryTopic = topicModeler.get_topic(queryString)
+    logger.debug(f"Query topic: {queryTopic}")
 
     return render_template('results.html', results=results, queryTopic=queryTopic)
 
@@ -159,13 +193,14 @@ def recommend():
 
 def main():
     logger.debug("Initializing General Operations...")
-    preprocessedDocuments = dataPreprocessor.preprocessData(documents)
-    preprocessedDocumentsAsStrings = [" ".join(doc) for doc in preprocessedDocuments]
+    preprocessedDocuments = dataPreprocessor.preprocessDocuments(documents)
     global docEmbeddings, clusters
     index = invertedIndex.buildInvertedIndex(preprocessedDocuments)
     docEmbeddings = embeddingGenerator.generateEmbeddings(preprocessedDocuments)
+    if not isinstance(docEmbeddings, np.ndarray):
+        docEmbeddings = np.array(docEmbeddings)
     clusters = documentClusterer.clusterDocuments(docEmbeddings)
-    topics, numTopics = topicModeler.model(preprocessedDocumentsAsStrings)
+    topics, numTopics = topicModeler.model(preprocessedDocuments, docEmbeddings)
 
     webInterface.prepareVisualizationData(docEmbeddings, clusters)
 

@@ -17,9 +17,27 @@ class DataPreprocessor:
     def preprocessText(self, text):
         text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
         text = text.lower()
-        tokens = word_tokenize(text)
-        tokens = [self.lemmatizer.lemmatize(self.ps.stem(word)) for word in tokens if word not in self.stopWords]
-        return tokens
+        return text
 
-    def preprocessData(self, data):
-        return [self.preprocessText(text) for text in data]
+    def removeStopwords(self, text):
+        tokens = word_tokenize(text)
+        filteredText = [word for word in tokens if word not in self.stopWords]
+        return ' '.join(filteredText)
+
+    def applyStemming(self, text):
+        stemmedText = [self.ps.stem(word) for word in word_tokenize(text)]
+        return ' '.join(stemmedText)
+
+    def applyLemmatization(self, text):
+        lemmatizedText = [self.lemmatizer.lemmatize(word) for word in word_tokenize(text)]
+        return ' '.join(lemmatizedText)
+
+    def preprocessDocuments(self, documents):
+        preprocessedDocuments = []
+        for document in documents:
+            preprocessedDocument = self.preprocessText(document)
+            preprocessedDocument = self.removeStopwords(preprocessedDocument)
+            preprocessedDocument = self.applyStemming(preprocessedDocument)
+            preprocessedDocument = self.applyLemmatization(preprocessedDocument)
+            preprocessedDocuments.append(preprocessedDocument)
+        return preprocessedDocuments
