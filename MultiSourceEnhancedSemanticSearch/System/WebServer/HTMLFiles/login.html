@@ -4,6 +4,65 @@
     <meta charset="UTF-8">
     <title>Login</title>
 </head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 50px;
+    }
+
+    form {
+        text-align: center;
+        margin-top: 50px;
+    }
+
+    input[type="text"] {
+        width: 300px;
+        height: 30px;
+        font-size: 16px;
+        padding-left: 10px;
+    }
+
+    input[type="password"] {
+        width: 300px;
+        height: 30px;
+        font-size: 16px;
+        padding-left: 10px;
+    }
+
+    input[type="submit"] {
+        width: 100px;
+        height: 30px;
+        font-size: 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #45a049;
+    }
+
+    a {
+        display: block;
+        text-align: center;
+        margin-top: 50px;
+        text-decoration: none;
+        color: #4CAF50;
+        font-size: 16px;
+    }
+
+    a:hover {
+        color: #45a049;
+    }
+</style>
 <body>
     <h1>Login</h1>
     <form action="/login" method="post">
