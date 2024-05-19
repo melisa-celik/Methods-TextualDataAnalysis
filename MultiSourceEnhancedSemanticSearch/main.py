@@ -129,7 +129,7 @@ def visualize():
     visualizationData['Cluster'] = clusters
     fig = px.scatter(visualizationData, x=0, y=1, color='Cluster', title='Document Clusters')
     graph = fig.to_html(full_html=False)
-    return render_template('visualize.html', graph=graph)
+    return render_template('visualization.html', graph=graph)
 
 @app.route('/')
 def index():
